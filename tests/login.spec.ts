@@ -77,7 +77,7 @@ import { test, expect } from "@playwright/test";
 
 //SCRIPT CREATED WITH RECORDING USING CODEGEN AND ADDED EXPECTATIONS
 test("test", async ({ page }) => {
-  await page.goto("https://www.saucedemo.com/");
+  await page.goto("/");
   await page.locator('[data-test="username"]').click();
   await page.locator('[data-test="username"]').fill("problem_user");
   await page.locator('[data-test="password"]').click();
