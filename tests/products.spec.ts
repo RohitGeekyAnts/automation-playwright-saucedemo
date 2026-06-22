@@ -1,31 +1,26 @@
 import { test, expect } from "@playwright/test";
+import { users } from "../data/users";
+import { LoginPage } from "../pages/login.page";
+import { ProductsPage } from "../pages/products.page";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  const loginPage = new LoginPage(page);
 
-  await page.locator('[data-test="username"]').fill("standard_user");
-  await page.locator('[data-test="password"]').fill("secret_sauce");
-  await page.locator('[data-test="login-button"]').click();
-
+  await loginPage.goto();
+  await loginPage.login(users.standard.username, users.standard.password);
   await expect(page).toHaveURL(/inventory/);
 });
 
-//PRODUCTS DISPLAY
 test("Verify products page displays items", async ({ page }) => {
-  await expect(page.locator('[data-test="inventory-item"]')).toHaveCount(6);
+  const productsPage = new ProductsPage(page);
 
-  await expect(
-    page.locator('[data-test="inventory-item-name"]').first(),
-  ).toBeVisible();
+  await productsPage.expectProductCount(6);
+  await productsPage.expectFirstProductNameVisible();
 });
 
-//SORTING
 test("User can sort products by price low to high", async ({ page }) => {
-  await page
-    .locator('[data-test="product-sort-container"]')
-    .selectOption("lohi");
+  const productsPage = new ProductsPage(page);
 
-  await expect(
-    page.locator('[data-test="inventory-item-price"]').first(),
-  ).toHaveText("$7.99");
+  await productsPage.sortByPriceLowToHigh();
+  await productsPage.expectFirstProductPrice("$7.99");
 });

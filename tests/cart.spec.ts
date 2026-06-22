@@ -1,42 +1,35 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
+import { productNames } from "../data/checkout";
+import { users } from "../data/users";
+import { CartPage } from "../pages/cart.page";
+import { LoginPage } from "../pages/login.page";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/");
+  const loginPage = new LoginPage(page);
 
-  await page.locator('[data-test="username"]').fill("standard_user");
-  await page.locator('[data-test="password"]').fill("secret_sauce");
-  await page.locator('[data-test="login-button"]').click();
+  await loginPage.goto();
+  await loginPage.login(users.standard.username, users.standard.password);
 });
 
-//ADD PRODUCT TO CART
 test("User can add a product to cart", async ({ page }) => {
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  const cartPage = new CartPage(page);
 
-  await expect(page.locator('[data-test="shopping-cart-badge"]')).toHaveText(
-    "1",
-  );
+  await cartPage.addBackpack();
+  await cartPage.expectCartBadgeCount("1");
 });
 
-//REMOVE PRODUCT FROM CART
 test("User can remove a product from cart", async ({ page }) => {
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  const cartPage = new CartPage(page);
 
-  await page.locator('[data-test="remove-sauce-labs-backpack"]').click();
-
-  await expect(page.locator('[data-test="shopping-cart-badge"]')).toHaveCount(
-    0,
-  );
+  await cartPage.addBackpack();
+  await cartPage.removeBackpack();
+  await cartPage.expectCartBadgeHidden();
 });
 
-//VIEW PRODUCT IN CART
 test("User can view items in cart", async ({ page }) => {
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
+  const cartPage = new CartPage(page);
 
-  await page.locator('[data-test="shopping-cart-link"]').click();
-
-  await expect(page).toHaveURL(/cart/);
-
-  await expect(page.locator('[data-test="inventory-item-name"]')).toHaveText(
-    "Sauce Labs Backpack",
-  );
+  await cartPage.addBackpack();
+  await cartPage.openCart();
+  await cartPage.expectCartContains(productNames.backpack);
 });

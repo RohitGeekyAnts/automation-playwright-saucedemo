@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { users } from "../data/users";
+import { LoginPage } from "../pages/login.page";
 
 // BASIC APPROACH
 // test("Successful Login", async ({ page }) => {
@@ -76,15 +78,30 @@ import { test, expect } from "@playwright/test";
 // });
 
 //SCRIPT CREATED WITH RECORDING USING CODEGEN AND ADDED EXPECTATIONS
-test("test", async ({ page }) => {
-  await page.goto("/");
-  await page.locator('[data-test="username"]').click();
-  await page.locator('[data-test="username"]').fill("problem_user");
-  await page.locator('[data-test="password"]').click();
-  await page.locator('[data-test="password"]').fill("secret_sauce");
-  await page.locator('[data-test="login-button"]').click();
+// test("test", async ({ page }) => {
+//   await page.goto("/");
+//   await page.locator('[data-test="username"]').fill("problem_user");
+//   await page.locator('[data-test="password"]').fill("secret_sauce");
+//   await page.locator('[data-test="login-button"]').click();
 
-  await expect(page).toHaveURL(/inventory/);
+//   await expect(page).toHaveURL(/inventory/);
 
-  await expect(page.locator('[data-test="title"]')).toHaveText("Products");
+//   await expect(page.locator('[data-test="title"]')).toHaveText("Products");
+// });
+
+//SPEC FILE WITH POM
+
+test("Successful Login with Valid creds", async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
+  await loginPage.login(users.problem.username, users.problem.password);
+  await loginPage.expectInventoryPage();
+});
+
+test("should show error for invalid credentials", async ({ page }) => {
+  const loginPage = new LoginPage(page);
+
+  await loginPage.goto();
+  await loginPage.login(users.invalid.username, users.invalid.password);
+  await loginPage.expectLoginError();
 });
